@@ -74,7 +74,7 @@ async def generate_caption(filename, directory, caption_template):
     )
 
     audio_languages = audio_languages if audio_languages else "Unknown"
-    subtitle_languages = subtitle_languages if subtitle_languages else "Unknown"
+    subtitle_languages = subtitle_languages if subtitle_languages else "-"
     video_quality = video_quality if video_quality else "Unknown"
     file_md5_hash = calculate_md5(file_path)
 
