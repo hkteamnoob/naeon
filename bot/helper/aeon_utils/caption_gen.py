@@ -23,12 +23,14 @@ def clean_filename(filename):
     # Remove file extension
     name, _ = os.path.splitext(filename)
 
-    # Match and extract the movie name (text between tag and year)
-    match = re.search(r"@\S+\s+(.+?)\s+\b\d{4}\b", name)  # Match between @abc and year
+    # Match and extract the movie name and year
+    match = re.search(r"@\S+\s+(.+?)\s+(\d{4})\b", name)  # Extract movie name & year
     if match:
-        return match.group(1).strip()
+        movie_name = match.group(1).strip()
+        movie_year = match.group(2)
+        return f"{movie_name} ({movie_year})"  # Format as "Movie Name (Year)"
     
-    # Fallback if no match (return original cleaned name)
+    # Fallback if no match
     return name
     
 async def generate_caption(filename, directory, caption_template):
