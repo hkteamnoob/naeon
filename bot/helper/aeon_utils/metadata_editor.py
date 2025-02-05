@@ -66,6 +66,7 @@ async def get_metadata_cmd(file_path, key):
     if not streams:
         return None, None
 
+    # Extract languages for streams
     languages = {
         stream["index"]: stream["tags"]["language"]
         for stream in streams
@@ -73,7 +74,7 @@ async def get_metadata_cmd(file_path, key):
     }
 
     cmd = [
-        "xtra",
+        "ffmpeg",
         "-hide_banner",
         "-loglevel",
         "error",
@@ -85,8 +86,6 @@ async def get_metadata_cmd(file_path, key):
         "-1",
         "-c",
         "copy",
-        "-metadata:s:v:0",
-        f"title={key}",
         "-metadata",
         f"title={key}",
     ]
@@ -105,52 +104,25 @@ async def get_metadata_cmd(file_path, key):
                 first_video = True
             cmd.extend([f"-metadata:s:v:{stream_index}", f"title={key}"])
             if stream_index in languages:
-                cmd.extend(
-                    [
-                        f"-metadata:s:v:{stream_index}",
-                        f"language={languages[stream_index]}",
-                    ],
-                )
+                cmd.extend([f"-metadata:s:v:{stream_index}", f"language={languages[stream_index]}"])
+
         elif stream_type == "audio":
-            cmd.extend(
-                [
-                    "-map",
-                    f"0:{stream_index}",
-                    f"-metadata:s:a:{audio_index}",
-                    f"title={key}",
-                ],
-            )
+            title_value = f"{languages.get(stream_index, '')}-{key}" if stream_index in languages else key
+            cmd.extend(["-map", f"0:{stream_index}", f"-metadata:s:a:{audio_index}", f"title={title_value}"])
             if stream_index in languages:
-                cmd.extend(
-                    [
-                        f"-metadata:s:a:{audio_index}",
-                        f"language={languages[stream_index]}",
-                    ],
-                )
+                cmd.extend([f"-metadata:s:a:{audio_index}", f"language={languages[stream_index]}"])
             audio_index += 1
+
         elif stream_type == "subtitle":
             codec_name = stream.get("codec_name", "unknown")
             if codec_name in ["webvtt", "unknown"]:
-                LOGGER.warning(
-                    f"Skipping unsupported subtitle metadata modification: {codec_name} for stream {stream_index}",
-                )
+                LOGGER.warning(f"Skipping unsupported subtitle metadata modification: {codec_name} for stream {stream_index}")
             else:
-                cmd.extend(
-                    [
-                        "-map",
-                        f"0:{stream_index}",
-                        f"-metadata:s:s:{subtitle_index}",
-                        f"title={key}",
-                    ],
-                )
+                cmd.extend(["-map", f"0:{stream_index}", f"-metadata:s:s:{subtitle_index}", f"title={key}"])
                 if stream_index in languages:
-                    cmd.extend(
-                        [
-                            f"-metadata:s:s:{subtitle_index}",
-                            f"language={languages[stream_index]}",
-                        ],
-                    )
+                    cmd.extend([f"-metadata:s:s:{subtitle_index}", f"language={languages[stream_index]}"])
                 subtitle_index += 1
+
         else:
             cmd.extend(["-map", f"0:{stream_index}"])
 
