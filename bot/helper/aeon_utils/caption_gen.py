@@ -76,7 +76,7 @@ async def generate_caption(filename, directory, caption_template):
 def get_video_quality(height):
     quality_map = {
         272: "LQ/360p",
-        304: "SD/480p",
+        360: "SD/480p",
         536: "HD/720p",
         800: "FHD/1080p",
         2160: "QHD/2160p",
