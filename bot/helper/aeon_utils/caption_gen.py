@@ -95,16 +95,20 @@ def get_video_quality(height):
     quality_map = {
         272: "LQ/360p",
         360: "SD/480p",
-        536: "HD/720p",
-        800: "FHD/1080p",
+        540: "HD/720p",
+        799: "HD/720p",  # Anything below 800px is still 720p
+        1080: "FHD/1080p",  # Includes 800px cropped 1080p videos
         2160: "QHD/2160p",
         4320: "UHD/4320p",
         8640: "FUHD/8640p",
     }
+
     for threshold, quality in sorted(quality_map.items()):
         if height and int(height) <= threshold:
             return quality
+
     return "Unknown"
+
 
 
 def parse_audio_language(existing_languages, audio_stream):
