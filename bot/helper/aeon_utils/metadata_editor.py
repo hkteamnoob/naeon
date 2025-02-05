@@ -74,7 +74,7 @@ async def get_metadata_cmd(file_path, key):
     }
 
     cmd = [
-        "ffmpeg",
+        "xtra",
         "-hide_banner",
         "-loglevel",
         "error",
