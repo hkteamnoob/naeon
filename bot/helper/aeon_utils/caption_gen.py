@@ -19,12 +19,15 @@ class DefaultDict(dict):
     def __missing__(self, key):
         return "Unknown"
 
+import re
+import os
+
 def clean_filename(filename):
     # Remove file extension
     name, _ = os.path.splitext(filename)
 
-    # Match and extract the movie name and year
-    match = re.search(r"@\S+\s+(.+?)\s+(\d{4})\b", name)  # Extract movie name & year
+    # Match movie name and year (capture text before the year)
+    match = re.search(r"(.+?)\s+(\d{4})\b", name)  # Extract movie name & year
     if match:
         movie_name = match.group(1).strip()
         movie_year = match.group(2)
@@ -32,6 +35,7 @@ def clean_filename(filename):
     
     # Fallback if no match
     return name
+
     
 async def generate_caption(filename, directory, caption_template):
     file_path = os.path.join(directory, filename)
