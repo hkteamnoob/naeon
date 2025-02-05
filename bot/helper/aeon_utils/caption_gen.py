@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from contextlib import suppress
 from hashlib import md5
 
@@ -18,7 +19,18 @@ class DefaultDict(dict):
     def __missing__(self, key):
         return "Unknown"
 
+def clean_filename(filename):
+    # Remove file extension
+    name, _ = os.path.splitext(filename)
 
+    # Match and extract the movie name (text between tag and year)
+    match = re.search(r"@\S+\s+(.+?)\s+\b\d{4}\b", name)  # Match between @abc and year
+    if match:
+        return match.group(1).strip()
+    
+    # Fallback if no match (return original cleaned name)
+    return name
+    
 async def generate_caption(filename, directory, caption_template):
     file_path = os.path.join(directory, filename)
 
@@ -61,7 +73,7 @@ async def generate_caption(filename, directory, caption_template):
     file_md5_hash = calculate_md5(file_path)
 
     caption_data = DefaultDict(
-        filename=filename,
+        filename=clean_filename(filename),  # Processed filename
         size=get_readable_file_size(await aiopath.getsize(file_path)),
         duration=get_readable_time(video_duration, True),
         quality=video_quality,
